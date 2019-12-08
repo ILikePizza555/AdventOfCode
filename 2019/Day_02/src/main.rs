@@ -1,20 +1,52 @@
 extern crate num;
 
 use num::Integer;
+use std::error::Error;
 
-struct MachineState<TMemSize: Integer>
+struct MachineState<TMem: Integer>
 {
     halt: bool,
-    memory: Vec<TMemSize>,
+    memory: Vec<TMem>,
     instruction_pointer: usize
 }
 
-impl<TMemSize: Integer> MachineState<TMemSize> {
-    fn set_instruction_pointer(&mut self, to: usize) {
+impl<TMem: Integer> MachineState<TMem> {
+    fn set_instruction_pointer(self, to: usize) -> Result<MachineState<TMem>, String> {
         if to > self.memory.len() {
-            panic!("New instruction pointer {} outside of memory range {}", to, self.memory.len());
+            return Err(format!("New instruction pointer {} outside of memory range {}", to, self.memory.len()));
         }
-        self.instruction_pointer = to;
+        
+        return Ok(MachineState {
+            halt: self.halt,
+            memory: self.memory,
+            instruction_pointer: to
+        })
+    }
+
+    fn write_memory(self, i: usize, d: TMem) -> Result<MachineState<TMem>, String> {
+        if to > self.memory.len() {
+            return Error(format!("Write to {} outside of memory range {}", i, self.memory.len()))
+        }
+
+        let rv = MachineState {
+            halt: self.halt,
+            memory: self.memory,
+            instruction_pointer: self.instruction_pointer
+        };
+        rv.memory[i] = d;
+        return rv;
+    }
+    
+    fn halt(self) -> MachineState<TMem> {
+        return MachineState {
+            halt: true,
+            memory: self.memory,
+            instruction_pointer: self.instruction_pointer
+        }
+    }
+
+    fn read_memory(&self, i: usize, n: usize) -> &[TMem] {
+        return self.memory[i..i + n];
     }
 }
 
