@@ -24,17 +24,17 @@ impl<TMem: Integer> MachineState<TMem> {
     }
 
     fn write_memory(self, i: usize, d: TMem) -> Result<MachineState<TMem>, String> {
-        if to > self.memory.len() {
-            return Error(format!("Write to {} outside of memory range {}", i, self.memory.len()))
+        if i > self.memory.len() {
+            return Err(format!("Write to {} outside of memory range {}", i, self.memory.len()))
         }
 
-        let rv = MachineState {
+        let mut rv = MachineState {
             halt: self.halt,
             memory: self.memory,
             instruction_pointer: self.instruction_pointer
         };
         rv.memory[i] = d;
-        return rv;
+        return Ok(rv);
     }
     
     fn halt(self) -> MachineState<TMem> {
@@ -46,7 +46,7 @@ impl<TMem: Integer> MachineState<TMem> {
     }
 
     fn read_memory(&self, i: usize, n: usize) -> &[TMem] {
-        return self.memory[i..i + n];
+        return &self.memory[i..i + n];
     }
 }
 
