@@ -59,27 +59,18 @@ impl MachineState {
         let a = self.memory[self.instruction_pointer + 1];
         let b = self.memory[self.instruction_pointer + 2];
         let loc = self.memory[self.instruction_pointer + 3] as usize;
-
-        let mut new_state = MachineState {
-            halt: self.halt,
-            memory: self.memory,
-            instruction_pointer: self.instruction_pointer + 4
-        };
+        let next_pointer = self.instruction_pointer + 4;
 
         if opcode == 1 {
             // Addition
-            new_state.memory[loc] = a + b;
-            
-            return Ok(new_state);
+            return self.write_memory(loc, a + b).and_then(|m| m.set_instruction_pointer(next_pointer));
         }
         else if opcode == 2 {
             // Multiplication
-            new_state.memory[loc] = a * b;
-
-            return Ok(new_state);
+            return self.write_memory(loc, a * b).and_then(|m| m.set_instruction_pointer(next_pointer));
         }
         else if opcode == 99 {
-            return Ok(new_state.halt());
+            return Ok(self.halt());
         }
         else {
             return Err(format!("Invalid opcode {} at memory location {}", opcode, self.instruction_pointer));
