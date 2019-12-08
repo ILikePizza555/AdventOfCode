@@ -23,7 +23,7 @@ impl MachineState {
         })
     }
 
-    fn write_memory(self, i: usize, d: TMem) -> Result<MachineState, String> {
+    fn write_memory(self, i: usize, d: i32) -> Result<MachineState, String> {
         if i > self.memory.len() {
             return Err(format!("Write to {} outside of memory range {}", i, self.memory.len()))
         }
@@ -52,38 +52,34 @@ impl MachineState {
 
     fn step(self) -> Result<MachineState, String> {
         if self.halt == true {
-            return Err("Machine is halted.");
+            return Err("Machine is halted.".to_string());
         }
 
         let opcode = self.memory[self.instruction_pointer];
         let a = self.memory[self.instruction_pointer + 1];
         let b = self.memory[self.instruction_pointer + 2];
-        let loc = self.memory[self.instruction_pointer + 3];
+        let loc = self.memory[self.instruction_pointer + 3] as usize;
 
-        let mut new_memory = self.memory;
+        let mut new_state = MachineState {
+            halt: self.halt,
+            memory: self.memory,
+            instruction_pointer: self.instruction_pointer + 4
+        };
 
         if opcode == 1 {
             // Addition
-            new_memory[loc] = a + b;
+            new_state.memory[loc] = a + b;
             
-            return Ok(MachineState {
-                halt: self.halt,
-                memory: new_memory,
-                instruction_pointer: self.instruction_pointer + 4
-            });
+            return Ok(new_state);
         }
         else if opcode == 2 {
             // Multiplication
-            new_memory[loc] = a * b;
+            new_state.memory[loc] = a * b;
 
-            return Ok(MachineState {
-                halt: self.halt,
-                memory: new_memory,
-                instruction_pointer: self.instruction_pointer + 4
-            });
+            return Ok(new_state);
         }
         else if opcode == 99 {
-            return Ok(self.halt());
+            return Ok(new_state.halt());
         }
         else {
             return Err(format!("Invalid opcode {} at memory location {}", opcode, self.instruction_pointer));
@@ -108,7 +104,7 @@ fn get_input_code() -> Vec<i32> {
 }
 
 fn main() {
-    let mut machine_state = make_machine_state(get_input_code())
+    let mut machine_state = make_machine_state(vec![1,0,0,0,99])
         .write_memory(1, 12)
         .and_then(|m| m.write_memory(2, 2))
         .expect("Error: ");
