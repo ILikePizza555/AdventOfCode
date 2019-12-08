@@ -101,7 +101,7 @@ fn get_input_code() -> Vec<i32> {
 }
 
 fn main() {
-    let mut machine_state = make_machine_state(vec![1,0,0,0,99])
+    let mut machine_state = make_machine_state(get_input_code())
         .write_memory(1, 12)
         .and_then(|m| m.write_memory(2, 2))
         .expect("Error: ");
