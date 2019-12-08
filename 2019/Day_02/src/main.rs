@@ -46,8 +46,8 @@ impl MachineState {
         }
     }
 
-    fn read_memory(&self, i: usize, n: usize) -> &[i32] {
-        return &self.memory[i..i + n];
+    fn read_location(&self, i: usize) -> i32 {
+        return self.memory[self.memory[i] as usize];
     }
 
     fn step(self) -> Result<MachineState, String> {
@@ -56,17 +56,23 @@ impl MachineState {
         }
 
         let opcode = self.memory[self.instruction_pointer];
-        let a = self.memory[self.instruction_pointer + 1];
-        let b = self.memory[self.instruction_pointer + 2];
-        let loc = self.memory[self.instruction_pointer + 3] as usize;
-        let next_pointer = self.instruction_pointer + 4;
 
         if opcode == 1 {
             // Addition
+            let a = self.read_location(self.instruction_pointer + 1);
+            let b = self.read_location(self.instruction_pointer + 2);
+            let loc = self.memory[self.instruction_pointer + 3] as usize;
+            let next_pointer = self.instruction_pointer + 4;
+
             return self.write_memory(loc, a + b).and_then(|m| m.set_instruction_pointer(next_pointer));
         }
         else if opcode == 2 {
             // Multiplication
+            let a = self.read_location(self.instruction_pointer + 1);
+            let b = self.read_location(self.instruction_pointer + 2);
+            let loc = self.memory[self.instruction_pointer + 3] as usize;
+            let next_pointer = self.instruction_pointer + 4;
+
             return self.write_memory(loc, a * b).and_then(|m| m.set_instruction_pointer(next_pointer));
         }
         else if opcode == 99 {
