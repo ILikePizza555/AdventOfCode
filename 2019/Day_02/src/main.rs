@@ -1,11 +1,15 @@
-struct MachineState
+extern crate num;
+
+use num::Integer;
+
+struct MachineState<TMemSize: Integer>
 {
     halt: bool,
-    memory: Vec<u8>,
+    memory: Vec<TMemSize>,
     instruction_pointer: usize
 }
 
-impl MachineState {
+impl<TMemSize: Integer> MachineState<TMemSize> {
     fn set_instruction_pointer(&mut self, to: usize) {
         if to > self.memory.len() {
             panic!("New instruction pointer {} outside of memory range {}", to, self.memory.len());
@@ -14,7 +18,7 @@ impl MachineState {
     }
 }
 
-fn make_machine_state(memory: Vec<u8>) -> MachineState {
+fn make_machine_state<TMemSize: Integer>(memory: Vec<TMemSize>) -> MachineState<TMemSize> {
     return MachineState {
         halt: false,
         memory: memory,
@@ -22,12 +26,12 @@ fn make_machine_state(memory: Vec<u8>) -> MachineState {
     }
 }
 
-fn get_input_code() -> Vec<u8> {
+fn get_input_code() -> Vec<i32> {
     return include_str!("input1.csv")
         .trim()
         .split(",")
-        .map(|x| str::parse::<u8>(x).unwrap())
-        .collect::<Vec::<u8>>();
+        .map(|x| str::parse::<i32>(x).unwrap())
+        .collect::<Vec::<i32>>();
 }
 
 fn main() {

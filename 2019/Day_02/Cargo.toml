@@ -5,3 +5,4 @@ authors = ["Izzy <avrisaac555@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+num = "0.2"
