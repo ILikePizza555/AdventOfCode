@@ -3,15 +3,15 @@ extern crate num;
 use num::Integer;
 use std::error::Error;
 
-struct MachineState<TMem: Integer>
+struct MachineState
 {
     halt: bool,
-    memory: Vec<TMem>,
+    memory: Vec<i32>,
     instruction_pointer: usize
 }
 
-impl<TMem: Integer> MachineState<TMem> {
-    fn set_instruction_pointer(self, to: usize) -> Result<MachineState<TMem>, String> {
+impl MachineState {
+    fn set_instruction_pointer(self, to: usize) -> Result<MachineState, String> {
         if to > self.memory.len() {
             return Err(format!("New instruction pointer {} outside of memory range {}", to, self.memory.len()));
         }
@@ -23,7 +23,7 @@ impl<TMem: Integer> MachineState<TMem> {
         })
     }
 
-    fn write_memory(self, i: usize, d: TMem) -> Result<MachineState<TMem>, String> {
+    fn write_memory(self, i: usize, d: TMem) -> Result<MachineState, String> {
         if i > self.memory.len() {
             return Err(format!("Write to {} outside of memory range {}", i, self.memory.len()))
         }
@@ -37,19 +37,20 @@ impl<TMem: Integer> MachineState<TMem> {
         return Ok(rv);
     }
     
-    fn halt(self) -> MachineState<TMem> {
+    fn halt(self) -> MachineState {
         return MachineState {
             halt: true,
             memory: self.memory,
             instruction_pointer: self.instruction_pointer
+     
         }
     }
 
-    fn read_memory(&self, i: usize, n: usize) -> &[TMem] {
+    fn read_memory(&self, i: usize, n: usize) -> &[i32] {
         return &self.memory[i..i + n];
     }
 
-    fn step(self) -> Result<MachineState<TMem>, String> {
+    fn step(self) -> Result<MachineState, String> {
         if self.halt == true {
             return Err("Machine is halted.");
         }
@@ -85,12 +86,12 @@ impl<TMem: Integer> MachineState<TMem> {
             return Ok(self.halt());
         }
         else {
-            return Err("Invalid opcode {} at memory location {}", opcode, self.instruction_pointer);
+            return Err(format!("Invalid opcode {} at memory location {}", opcode, self.instruction_pointer));
         }
     }
 }
 
-fn make_machine_state<TMemSize: Integer>(memory: Vec<TMemSize>) -> MachineState<TMemSize> {
+fn make_machine_state(memory: Vec<i32>) -> MachineState {
     return MachineState {
         halt: false,
         memory: memory,
@@ -107,10 +108,14 @@ fn get_input_code() -> Vec<i32> {
 }
 
 fn main() {
-    let machine_state = make_machine_state(get_input_code())
+    let mut machine_state = make_machine_state(get_input_code())
         .write_memory(1, 12)
         .and_then(|m| m.write_memory(2, 2))
         .expect("Error: ");
+
+    while machine_state.halt != true {
+        machine_state = machine_state.step().expect("Error: ");
+    }
     
     println!("Memory: {:?}", machine_state.memory);
 }
